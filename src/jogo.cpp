@@ -4,7 +4,7 @@
 
 Jogo::Jogo()
 {
-    // srand(time(NULL));
+    srand(time(NULL));
     grid = Grid();
     blocks = GetAllBlocks();
     blocoAtual = GetRandomBlock();
@@ -66,7 +66,7 @@ void Jogo::Draw()
         blocoHold.Desenhar(345, 500);
         break;
     case 4:
-        blocoHold.Desenhar(345, 490);
+        blocoHold.Desenhar(375, 490);
         break;
     default:
         blocoHold.Desenhar(360, 485);
