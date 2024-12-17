@@ -10,6 +10,6 @@ extern const Color amarelo;
 extern const Color roxo;
 extern const Color ciano;
 extern const Color azul;
-extern const Color cinzaClaro;
+extern const Color cinzaEscuro;
 
 std::vector<Color> GetCoresCelulas();

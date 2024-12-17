@@ -57,7 +57,7 @@ int main()
 
         // Começa a renderização da tela
         BeginDrawing();
-        ClearBackground(cinzaClaro); // Define a cor de fundo como cinza claro
+        ClearBackground(cinzaEscuro); // Define a cor de fundo como cinza claro
 
         // Desenha o texto "SCORE" no topo direito da tela
         DrawTextEx(fonte, "SCORE", {330, 10}, 38, 2, WHITE);
