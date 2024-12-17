@@ -99,7 +99,6 @@ void Jogo::TratarEntrada()
         break;
     case KEY_SPACE:
         QuedaLivre();
-        UpdateScore(0, 100);
         break;
     case KEY_C:
         GuardarPeca();
@@ -131,13 +130,17 @@ void Jogo::GuardarPeca()
 
 void Jogo::QuedaLivre()
 {
+    int celulasDescidas = 0;
+
     if (!gameOver)
     {
         while (IsBlockOutside() == false && BlockFits() == true)
         {
             blocoAtual.Mover(1, 0);
+            celulasDescidas++;
         }
 
+        UpdateScore(0, celulasDescidas);
         blocoAtual.Mover(-1, 0);
         LockBlock();
     }
@@ -224,6 +227,7 @@ void Jogo::LockBlock()
     }
     proximoBloco = GetRandomBlock();
     int rowsCleared = grid.LimparLinhasCheias();
+    totalLinhas += rowsCleared;
     if (rowsCleared > 0)
     {
         PlaySound(clearSound);
@@ -258,13 +262,16 @@ void Jogo::UpdateScore(int linesCleared, int moveDownPoints)
     switch (linesCleared)
     {
     case 1:
-        score += 100;
+        score += 100 * nivel;
         break;
     case 2:
-        score += 300;
+        score += 300 * nivel;
         break;
     case 3:
-        score += 500;
+        score += 500 * nivel;
+        break;
+    case 4:
+        score += 800 * nivel;
         break;
     default:
         break;

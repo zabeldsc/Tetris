@@ -6,7 +6,7 @@
 // Variáveis globais para controle de tempo e nível do jogo
 double ultimaAttTempo = 0;       // Armazena o tempo da última atualização de evento
 double intervaloDescida = 1.0;  // Intervalo inicial para a peça descer (em segundos)
-int nivel = 1;                  // Nível atual do jogo
+
 
 // Função para verificar se um evento deve ser acionado baseado em um intervalo de tempo
 bool eventoAcionado(double intervalo)
@@ -48,9 +48,10 @@ int main()
         }
 
         // Atualiza o nível do jogo e ajusta o intervalo com base na pontuação
-        if (jogo.score >= nivel * 1000) // Cada 1000 pontos, aumenta o nível
+        if (jogo.totalLinhas >= jogo.nivel * 10) // Cada 10 linhas limpas, aumenta o nível
         {
-            nivel++;                     // Incrementa o nível
+            printf("Aumentou o nível");
+            jogo.nivel++;                     // Incrementa o nível
             intervaloDescida *= 0.9;     // Reduz o intervalo em 10% para acelerar o jogo
         }
 

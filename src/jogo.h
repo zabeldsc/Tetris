@@ -15,7 +15,9 @@ public:
     bool gameOver{};
     bool primeiroHold{};
     bool fezHold{};
+    int totalLinhas{};
     int score{};
+    int nivel = 1;                  // Nível atual do jogo
     Music musica{};
 
 private:
