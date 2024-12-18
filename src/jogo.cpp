@@ -255,6 +255,7 @@ void Jogo::Reset()
     blocoAtual = GetRandomBlock();
     proximoBloco = GetRandomBlock();
     score = 0;
+    gameOver = false;
 }
 
 void Jogo::UpdateScore(int linesCleared, int moveDownPoints)

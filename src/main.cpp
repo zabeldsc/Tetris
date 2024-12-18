@@ -4,12 +4,14 @@
 #include <iostream> // Biblioteca padrão para entrada/saída de dados (não usada diretamente aqui)
 #include <math.h>
 
+
 // Variáveis globais para controle de tempo e nível do jogo
 double ultimaAttTempo = 0;     // Armazena o tempo da última atualização de evento
 double intervaloDescida = 1.0; // Intervalo inicial para a peça descer (em segundos)
 bool jogoIniciado{};
 bool jogoComecou{};
 void DesenharMenu(Font fonte);
+void EncerrarJogo(Font fonte);
 
 // Função para verificar se um evento deve ser acionado baseado em um intervalo de tempo
 bool eventoAcionado(double intervalo)
@@ -81,8 +83,9 @@ int main()
         // Se o jogo estiver em estado de "game over", exibe o texto "GAME OVER"
         if (jogo.gameOver)
         {
-            DrawTextEx(fonte, "GAME OVER", {320, 450}, 38, 2, WHITE);
-        }
+            EncerrarJogo(fonte);
+            jogo.Reset();
+        }    void Reset();
 
         // Desenha a área do placar (score) como um retângulo arredondado
         DrawRectangleRounded({320, 50, 170, 60}, 0.2, 6, BLACK);
@@ -128,7 +131,6 @@ void DesenharMenu(Font fonte)
         Color DARKRED = {139, 0, 0, 255};
         Color MIDNIGHTBLUE = {25, 25, 112, 255}; // Azul escuro
 
-       
         // Obtém a posição do mouse
         Vector2 posicaoMouse = GetMousePosition();
 
@@ -204,6 +206,91 @@ void DesenharMenu(Font fonte)
         if (IsKeyPressed(KEY_ESCAPE))
         {
             CloseWindow(); // Fecha a janela ao pressionar ESC
+            exit(0);
+        }
+    }
+}
+
+void EncerrarJogo(Font fonte)
+{
+
+    // Tamanho dos botões
+    Rectangle botaoSim = {115, 350, 280, 50}; // Posição e tamanho do botão "Sim"
+    Rectangle botaoNao = {115, 420, 280, 50}; // Posição e tamanho do botão "Não"
+
+    // Variáveis para armazenar a cor dos botões
+    Color corBotaoSim = BLUE;
+    Color corBotaoNao = RED;
+
+    while (true) // Loop até o jogador decidir
+    {
+        Color DARKRED = {139, 0, 0, 255};            // Vermelho escuro
+        Color BACKGROUND_COLOR = {25, 25, 112, 255}; // Azul escuro
+
+        // Obtém a posição do mouse
+        Vector2 posicaoMouse = GetMousePosition();
+
+        // Muda a cor do botão "Sim" se o mouse estiver sobre ele
+        if (CheckCollisionPointRec(posicaoMouse, botaoSim))
+        {
+            corBotaoSim = DARKBLUE;
+        }
+        else
+        {
+            corBotaoSim = BLUE;
+        }
+
+        // Muda a cor do botão "Não" se o mouse estiver sobre ele
+        if (CheckCollisionPointRec(posicaoMouse, botaoNao))
+        {
+            corBotaoNao = DARKRED;
+        }
+        else
+        {
+            corBotaoNao = RED;
+        }
+
+        // Renderiza a tela
+        BeginDrawing();
+        ClearBackground(BACKGROUND_COLOR); // Fundo
+
+        // Mensagem de decisão
+        DrawTextEx(fonte, "Deseja jogar novamente?", {60, 250}, 32, 2, WHITE);
+
+        // Botões
+        DrawRectangleRec(botaoSim, corBotaoSim); // Botão "Sim"
+        DrawRectangleRec(botaoNao, corBotaoNao); // Botão "Não"
+
+        // Texto dentro dos botões
+        DrawTextEx(fonte, "SIM", {botaoSim.x + 100, botaoSim.y + 10}, 32, 2, WHITE);
+        DrawTextEx(fonte, "NÃO", {botaoNao.x + 100, botaoNao.y + 10}, 32, 2, WHITE);
+
+        EndDrawing();
+
+        // Detecta clique com o mouse
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            if (CheckCollisionPointRec(posicaoMouse, botaoSim))
+            {
+                jogoComecou = true; // Reinicia o jogo
+                break;              // Sai do loop e volta ao menu inicial
+            }
+            if (CheckCollisionPointRec(posicaoMouse, botaoNao))
+            {
+                CloseWindow(); // Fecha a janela e encerra o jogo
+                exit(0);
+            }
+        }
+
+        // Alternativa com o teclado
+        if (IsKeyPressed(KEY_ENTER)) // ENTER para jogar novamente
+        {
+            jogoComecou = true;
+            break;
+        }
+        if (IsKeyPressed(KEY_ESCAPE)) // ESC para sair
+        {
+            CloseWindow();
             exit(0);
         }
     }

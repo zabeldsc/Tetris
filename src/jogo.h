@@ -12,12 +12,13 @@ public:
     void GuardarPeca();
     void QuedaLivre();
     void DescerBloco();
+    void Reset();
     bool gameOver{};
     bool primeiroHold{};
     bool fezHold{};
     int totalLinhas{};
     int score{};
-    int nivel = 1;                  // Nível atual do jogo
+    int nivel = 1; // Nível atual do jogo
     Music musica{};
 
 private:
@@ -29,7 +30,6 @@ private:
     void RotateBlock();
     void LockBlock();
     bool BlockFits();
-    void Reset();
     void UpdateScore(int linesCleared, int moveDownPoints);
     Grid grid{};
     std::vector<Bloco> blocks;
