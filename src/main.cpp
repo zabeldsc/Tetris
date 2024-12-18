@@ -1,21 +1,24 @@
 #include <raylib.h>
-#include "jogo.h"  // Arquivo de cabeçalho para a lógica do jogo
-#include "cores.h" // Arquivo de cabeçalho para as definições de cores
+#include "jogo.h"   // Arquivo de cabeçalho para a lógica do jogo
+#include "cores.h"  // Arquivo de cabeçalho para as definições de cores
 #include <iostream> // Biblioteca padrão para entrada/saída de dados (não usada diretamente aqui)
+#include <math.h>
 
 // Variáveis globais para controle de tempo e nível do jogo
-double ultimaAttTempo = 0;       // Armazena o tempo da última atualização de evento
-double intervaloDescida = 1.0;  // Intervalo inicial para a peça descer (em segundos)
-
+double ultimaAttTempo = 0;     // Armazena o tempo da última atualização de evento
+double intervaloDescida = 1.0; // Intervalo inicial para a peça descer (em segundos)
+bool jogoIniciado{};
+bool jogoComecou{};
+void DesenharMenu(Font fonte);
 
 // Função para verificar se um evento deve ser acionado baseado em um intervalo de tempo
 bool eventoAcionado(double intervalo)
 {
-    double tempoAtual = GetTime(); // Obtém o tempo atual em segundos desde o início do jogo
+    double tempoAtual = GetTime();                // Obtém o tempo atual em segundos desde o início do jogo
     if (tempoAtual - ultimaAttTempo >= intervalo) // Verifica se o intervalo foi excedido
     {
         ultimaAttTempo = tempoAtual; // Atualiza o tempo da última atualização
-        return true; // Evento acionado
+        return true;                 // Evento acionado
     }
     return false; // Evento não acionado
 }
@@ -35,6 +38,13 @@ int main()
     // Loop principal do jogo
     while (WindowShouldClose() == false) // Enquanto a janela não for fechada
     {
+
+        if (!jogoIniciado)
+        {
+            // Desenha o menu
+            DesenharMenu(fonte);
+        }
+
         // Atualiza o fluxo de música para evitar travamentos ou loops incompletos
         UpdateMusicStream(jogo.musica);
 
@@ -51,8 +61,8 @@ int main()
         if (jogo.totalLinhas >= jogo.nivel * 10) // Cada 10 linhas limpas, aumenta o nível
         {
             printf("Aumentou o nível");
-            jogo.nivel++;                     // Incrementa o nível
-            intervaloDescida *= 0.9;     // Reduz o intervalo em 10% para acelerar o jogo
+            jogo.nivel++;            // Incrementa o nível
+            intervaloDescida *= 0.9; // Reduz o intervalo em 10% para acelerar o jogo
         }
 
         // Começa a renderização da tela
@@ -79,7 +89,7 @@ int main()
 
         // Converte a pontuação atual para texto e centraliza na área do placar
         char scoreTexto[10];
-        sprintf(scoreTexto, "%d", jogo.score); // Converte o score para uma string
+        sprintf(scoreTexto, "%d", jogo.score);                          // Converte o score para uma string
         Vector2 tamanhoTexto = MeasureTextEx(fonte, scoreTexto, 38, 2); // Mede o tamanho do texto
 
         // Desenha o texto da pontuação no centro da área do placar
@@ -100,4 +110,101 @@ int main()
 
     // Fecha a janela do jogo e libera os recursos alocados
     CloseWindow();
+}
+
+void DesenharMenu(Font fonte)
+{
+    // Tamanho do botão
+    Rectangle botaoJogar = {115, 400, 280, 50}; // Posição e tamanho do botão "Jogar"
+    Rectangle botaoSair = {115, 470, 280, 50};  // Posição e tamanho do botão "Sair"
+
+    // Variáveis para armazenar a cor dos botões
+    Color corBotaoJogar = BLUE;
+    Color corBotaoSair = RED;
+
+    // Enquanto o jogo não começou, mantém o menu visível
+    while (!jogoComecou)
+    {
+        Color DARKRED = {139, 0, 0, 255};
+        Color MIDNIGHTBLUE = {25, 25, 112, 255}; // Azul escuro
+
+       
+        // Obtém a posição do mouse
+        Vector2 posicaoMouse = GetMousePosition();
+
+        // Muda a cor do botão "Jogar" se o mouse estiver sobre ele
+        if (CheckCollisionPointRec(posicaoMouse, botaoJogar))
+        {
+            corBotaoJogar = DARKBLUE; // Cor escura quando o mouse está sobre o botão
+        }
+        else
+        {
+            corBotaoJogar = BLUE; // Cor normal do botão
+        }
+
+        // Muda a cor do botão "Sair" se o mouse estiver sobre ele
+        if (CheckCollisionPointRec(posicaoMouse, botaoSair))
+        {
+            corBotaoSair = DARKRED; // Cor escura quando o mouse está sobre o botão
+        }
+        else
+        {
+            corBotaoSair = RED; // Cor normal do botão
+        }
+
+        // Limpa a tela e coloca o fundo em uma cor agradável
+        BeginDrawing();
+        ClearBackground(MIDNIGHTBLUE); // Cor de fundo do menu
+
+        // Desenha o título do jogo no centro da tela
+        DrawTextEx(fonte, "TETRIS", {125, 100}, 64, 2, WHITE);
+
+        // Desenha instruções para o jogador
+        DrawTextEx(fonte, "Pressione ENTER para jogar", {30, 250}, 32, 2, WHITE);
+        DrawTextEx(fonte, "Pressione ESC para sair", {60, 300}, 32, 2, WHITE);
+
+        // Exibe uma mensagem explicando o objetivo
+        DrawTextEx(fonte, "Objetivo: Limpar as linhas!", {90, 350}, 24, 2, LIGHTGRAY);
+
+        // Desenha os botões "Jogar" e "Sair" com a cor atual
+        DrawRectangleRec(botaoJogar, corBotaoJogar); // Botão "Jogar"
+        DrawRectangleRec(botaoSair, corBotaoSair);   // Botão "Sair"
+
+        // Desenha o texto dentro dos botões
+        DrawTextEx(fonte, "JOGAR", {botaoJogar.x + 85, botaoJogar.y + 10}, 32, 2, WHITE);
+        DrawTextEx(fonte, "SAIR", {botaoSair.x + 100, botaoSair.y + 10}, 32, 2, WHITE);
+
+        // Fim da renderização
+        EndDrawing();
+
+        // Espera pela interação do usuário
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) // Detecta clique com o botão esquerdo do mouse
+        {
+            // Verifica se o clique foi dentro do botão "Jogar"
+            if (CheckCollisionPointRec(posicaoMouse, botaoJogar))
+            {
+                jogoComecou = true; // Inicia o jogo ao clicar no botão "Jogar"
+            }
+
+            // Verifica se o clique foi dentro do botão "Sair"
+            if (CheckCollisionPointRec(posicaoMouse, botaoSair))
+            {
+                CloseWindow(); // Fecha a janela ao clicar no botão "Sair"
+                exit(0);
+            }
+        }
+
+        // Verifica se a tecla ENTER foi pressionada para iniciar o jogo
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            jogoComecou = true; // Inicia o jogo ao pressionar ENTER
+        }
+
+        // Verifica se a tecla ESC foi pressionada para sair do jogo
+        if (IsKeyPressed(KEY_ESCAPE))
+        {
+            CloseWindow(); // Fecha a janela ao pressionar ESC
+            exit(0);
+        }
+    }
 }
