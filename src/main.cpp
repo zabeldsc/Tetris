@@ -3,15 +3,23 @@
 #include "cores.h"  // Arquivo de cabeçalho para as definições de cores
 #include <iostream> // Biblioteca padrão para entrada/saída de dados (não usada diretamente aqui)
 #include <math.h>
+#include <string.h>
 
+typedef struct
+{
+    char nome[50];
+    int score;
+} Jogadores;
 
 // Variáveis globais para controle de tempo e nível do jogo
 double ultimaAttTempo = 0;     // Armazena o tempo da última atualização de evento
 double intervaloDescida = 1.0; // Intervalo inicial para a peça descer (em segundos)
 bool jogoIniciado{};
-bool jogoComecou{};
-void DesenharMenu(Font fonte);
-void EncerrarJogo(Font fonte);
+Jogadores topJogadores[10] = {}; //= getJogadores();
+void DesenharMenu(Font fonte, Jogadores *Jogador);
+void EncerrarJogo(Font fonte, Jogadores *Jogador);
+void checkRanking(Jogadores *Jogador, int score);
+void atualizarRanking();
 
 // Função para verificar se um evento deve ser acionado baseado em um intervalo de tempo
 bool eventoAcionado(double intervalo)
@@ -36,6 +44,7 @@ int main()
 
     // Cria um objeto da classe Jogo que gerencia a lógica do jogo
     Jogo jogo = Jogo();
+    Jogadores jogador;
 
     // Loop principal do jogo
     while (WindowShouldClose() == false) // Enquanto a janela não for fechada
@@ -44,7 +53,7 @@ int main()
         if (!jogoIniciado)
         {
             // Desenha o menu
-            DesenharMenu(fonte);
+            DesenharMenu(fonte, &jogador);
         }
 
         // Atualiza o fluxo de música para evitar travamentos ou loops incompletos
@@ -83,9 +92,13 @@ int main()
         // Se o jogo estiver em estado de "game over", exibe o texto "GAME OVER"
         if (jogo.gameOver)
         {
-            EncerrarJogo(fonte);
+            checkRanking(&jogador, jogo.score);
+            EncerrarJogo(fonte, &jogador);
             jogo.Reset();
-        }    void Reset();
+            jogoIniciado = false;
+            DesenharMenu(fonte, &jogador);
+        }
+        void Reset();
 
         // Desenha a área do placar (score) como um retângulo arredondado
         DrawRectangleRounded({320, 50, 170, 60}, 0.2, 6, BLACK);
@@ -115,22 +128,26 @@ int main()
     CloseWindow();
 }
 
-void DesenharMenu(Font fonte)
+void DesenharMenu(Font fonte, Jogadores *Jogador)
 {
     // Tamanho do botão
-    Rectangle botaoJogar = {115, 400, 280, 50}; // Posição e tamanho do botão "Jogar"
-    Rectangle botaoSair = {115, 470, 280, 50};  // Posição e tamanho do botão "Sair"
+    Rectangle botaoJogar = {115, 430, 280, 50}; // Posição e tamanho do botão "Jogar"
+    Rectangle botaoSair = {115, 500, 280, 50};  // Posição e tamanho do botão "Sair"
 
     // Variáveis para armazenar a cor dos botões
     Color corBotaoJogar = BLUE;
     Color corBotaoSair = RED;
 
-    // Enquanto o jogo não começou, mantém o menu visível
-    while (!jogoComecou)
-    {
-        Color DARKRED = {139, 0, 0, 255};
-        Color MIDNIGHTBLUE = {25, 25, 112, 255}; // Azul escuro
+    // Variáveis para o nome do jogador
+    char nomeJogador[50] = "";  // Array para armazenar o nome do jogador
+    bool textoEditando = false; // Para verificar se o jogador está editando o nome
 
+    // Tamanho da caixa de entrada
+    Rectangle caixaTexto = {105, 345, 300, 40}; // Posição e tamanho da caixa de texto
+
+    // Enquanto o jogo não começou, mantém o menu visível
+    while (!jogoIniciado)
+    {
         // Obtém a posição do mouse
         Vector2 posicaoMouse = GetMousePosition();
 
@@ -162,11 +179,15 @@ void DesenharMenu(Font fonte)
         DrawTextEx(fonte, "TETRIS", {125, 100}, 64, 2, WHITE);
 
         // Desenha instruções para o jogador
-        DrawTextEx(fonte, "Pressione ENTER para jogar", {30, 250}, 32, 2, WHITE);
-        DrawTextEx(fonte, "Pressione ESC para sair", {60, 300}, 32, 2, WHITE);
+        DrawTextEx(fonte, "Pressione ENTER para jogar", {30, 200}, 32, 2, WHITE);
+        DrawTextEx(fonte, "Pressione ESC para sair", {60, 250}, 32, 2, WHITE);
 
         // Exibe uma mensagem explicando o objetivo
-        DrawTextEx(fonte, "Objetivo: Limpar as linhas!", {90, 350}, 24, 2, LIGHTGRAY);
+        DrawTextEx(fonte, "Insira seu nome:", {105, 320}, 24, 2, LIGHTGRAY);
+
+        // Desenha a caixa de texto para o nome do jogador (como um campo editável)
+        DrawRectangleRec(caixaTexto, LIGHTGRAY);                                              // Caixa de entrada
+        DrawTextEx(fonte, nomeJogador, {caixaTexto.x + 10, caixaTexto.y + 10}, 32, 2, BLACK); // Exibe o nome digitado
 
         // Desenha os botões "Jogar" e "Sair" com a cor atual
         DrawRectangleRec(botaoJogar, corBotaoJogar); // Botão "Jogar"
@@ -182,10 +203,20 @@ void DesenharMenu(Font fonte)
         // Espera pela interação do usuário
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) // Detecta clique com o botão esquerdo do mouse
         {
-            // Verifica se o clique foi dentro do botão "Jogar"
-            if (CheckCollisionPointRec(posicaoMouse, botaoJogar))
+            // Verifica se o clique foi dentro da caixa de texto para editar o nome
+            if (CheckCollisionPointRec(posicaoMouse, caixaTexto))
             {
-                jogoComecou = true; // Inicia o jogo ao clicar no botão "Jogar"
+                textoEditando = true; // Começa a editar o nome
+            }
+            else
+            {
+                textoEditando = false; // Interrompe a edição se clicar fora da caixa de texto
+            }
+
+            // Verifica se o clique foi dentro do botão "Jogar"
+            if (CheckCollisionPointRec(posicaoMouse, botaoJogar) && nomeJogador[0] != '\0') // Verifica se o nome foi digitado
+            {
+                jogoIniciado = true; // Inicia o jogo ao clicar no botão "Jogar"
             }
 
             // Verifica se o clique foi dentro do botão "Sair"
@@ -197,9 +228,10 @@ void DesenharMenu(Font fonte)
         }
 
         // Verifica se a tecla ENTER foi pressionada para iniciar o jogo
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER) && nomeJogador[0] != '\0')
         {
-            jogoComecou = true; // Inicia o jogo ao pressionar ENTER
+            strcpy(Jogador->nome, nomeJogador);
+            jogoIniciado = true; // Inicia o jogo ao pressionar ENTER
         }
 
         // Verifica se a tecla ESC foi pressionada para sair do jogo
@@ -208,12 +240,37 @@ void DesenharMenu(Font fonte)
             CloseWindow(); // Fecha a janela ao pressionar ESC
             exit(0);
         }
+
+        // Lê as teclas digitadas para o nome do jogador
+        if (textoEditando)
+        {
+            for (int i = 0; i < 255; i++) // Verifica as teclas pressionadas
+            {
+                if (IsKeyPressed(i) && i >= 32 && i <= 126) // Apenas caracteres visíveis
+                {
+                    int len = strlen(nomeJogador);
+                    if (len < 49) // Limita o tamanho máximo do nome
+                    {
+                        nomeJogador[len] = (char)i;  // Adiciona o caractere no nome
+                        nomeJogador[len + 1] = '\0'; // Finaliza a string
+                    }
+                }
+
+                if (IsKeyPressed(KEY_BACKSPACE)) // Remove o último caractere
+                {
+                    int len = strlen(nomeJogador);
+                    if (len > 0)
+                    {
+                        nomeJogador[len - 1] = '\0'; // Remove o último caractere
+                    }
+                }
+            }
+        }
     }
 }
 
-void EncerrarJogo(Font fonte)
+void EncerrarJogo(Font fonte, Jogadores *Jogador)
 {
-
     // Tamanho dos botões
     Rectangle botaoSim = {115, 350, 280, 50}; // Posição e tamanho do botão "Sim"
     Rectangle botaoNao = {115, 420, 280, 50}; // Posição e tamanho do botão "Não"
@@ -224,9 +281,6 @@ void EncerrarJogo(Font fonte)
 
     while (true) // Loop até o jogador decidir
     {
-        Color DARKRED = {139, 0, 0, 255};            // Vermelho escuro
-        Color BACKGROUND_COLOR = {25, 25, 112, 255}; // Azul escuro
-
         // Obtém a posição do mouse
         Vector2 posicaoMouse = GetMousePosition();
 
@@ -252,14 +306,16 @@ void EncerrarJogo(Font fonte)
 
         // Renderiza a tela
         BeginDrawing();
-        ClearBackground(BACKGROUND_COLOR); // Fundo
+        ClearBackground(MIDNIGHTBLUE); // Fundo
+
+        DrawTextEx(fonte, "GAME OVER!", {100, 100}, 50, 2, WHITE);
 
         // Mensagem de decisão
         DrawTextEx(fonte, "Deseja jogar novamente?", {60, 250}, 32, 2, WHITE);
 
         // Botões
-        DrawRectangleRec(botaoSim, corBotaoSim); // Botão "Sim"
-        DrawRectangleRec(botaoNao, corBotaoNao); // Botão "Não"
+        DrawRectangleRec(botaoSim, BLUE); // Botão "Sim"
+        DrawRectangleRec(botaoNao, RED);  // Botão "Não"
 
         // Texto dentro dos botões
         DrawTextEx(fonte, "SIM", {botaoSim.x + 100, botaoSim.y + 10}, 32, 2, WHITE);
@@ -272,8 +328,8 @@ void EncerrarJogo(Font fonte)
         {
             if (CheckCollisionPointRec(posicaoMouse, botaoSim))
             {
-                jogoComecou = true; // Reinicia o jogo
-                break;              // Sai do loop e volta ao menu inicial
+                jogoIniciado = true; // Reinicia o jogo
+                break;               // Sai do loop e volta ao menu inicial
             }
             if (CheckCollisionPointRec(posicaoMouse, botaoNao))
             {
@@ -285,7 +341,7 @@ void EncerrarJogo(Font fonte)
         // Alternativa com o teclado
         if (IsKeyPressed(KEY_ENTER)) // ENTER para jogar novamente
         {
-            jogoComecou = true;
+            jogoIniciado = true;
             break;
         }
         if (IsKeyPressed(KEY_ESCAPE)) // ESC para sair
@@ -294,4 +350,51 @@ void EncerrarJogo(Font fonte)
             exit(0);
         }
     }
+}
+
+void checkRanking(Jogadores *Jogador, int score)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        if (score > topJogadores[i].score)
+        {
+            // Desloca os jogadores para baixo
+            for (int j = 9; j > i; j--)
+            {
+                // Desloca para a próxima posição
+                strcpy(topJogadores[j].nome, topJogadores[j - 1].nome);
+                topJogadores[j].score = topJogadores[j - 1].score;
+            }
+
+            // Insere o novo jogador na posição correta
+            strcpy(topJogadores[i].nome, Jogador->nome);
+            topJogadores[i].score = score;
+            atualizarRanking();
+            break; // Sai do loop após a inserção
+        }
+    }
+}
+
+// Função para atualizar o ranking no arquivo
+void atualizarRanking()
+{
+    // Abre o arquivo para escrita (sobrescreve se já existir)
+    FILE *arquivo = fopen("ranking.txt", "w");
+
+    if (arquivo == NULL)
+    {
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return;
+    }
+
+    // Escreve os dados dos jogadores no arquivo
+    for (int i = 0; i < 10; i++)
+    {
+        fprintf(arquivo, "%s %d\n", topJogadores[i].nome, topJogadores[i].score);
+    }
+
+    // Fecha o arquivo
+    fclose(arquivo);
+
+    printf("Ranking atualizado com sucesso!\n");
 }

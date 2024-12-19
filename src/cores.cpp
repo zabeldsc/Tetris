@@ -9,6 +9,8 @@ const Color roxo = {128, 0, 128, 255};
 const Color ciano = {0, 255, 255, 255};
 const Color cinzaEscuro = {100, 100, 100, 255};
 const Color azul = {0, 0, 255, 255};
+const Color DARKRED = {139, 0, 0, 255};            // Vermelho escuro
+const Color MIDNIGHTBLUE = {25, 25, 112, 255}; // Azul escuro
 
 std::vector<Color> GetCoresCelulas()
 {

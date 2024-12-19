@@ -11,5 +11,7 @@ extern const Color roxo;
 extern const Color ciano;
 extern const Color azul;
 extern const Color cinzaEscuro;
+extern const Color DARKRED;           
+extern const Color MIDNIGHTBLUE; 
 
 std::vector<Color> GetCoresCelulas();

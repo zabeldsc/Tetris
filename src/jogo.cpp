@@ -12,7 +12,7 @@ Jogo::Jogo()
     gameOver = false;
     score = 0;
     InitAudioDevice();
-    musica = LoadMusicStream("sons/music.mp3");
+    // musica = LoadMusicStream("sons/music.mp3");
     PlayMusicStream(musica);
     rotateSound = LoadSound("sons/rotate.mp3");
     clearSound = LoadSound("sons/clear.mp3");
