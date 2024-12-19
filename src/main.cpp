@@ -4,6 +4,7 @@
 #include <iostream> // Biblioteca padrão para entrada/saída de dados (não usada diretamente aqui)
 #include <math.h>
 #include <string.h>
+#include <fstream>
 
 typedef struct
 {
@@ -20,6 +21,7 @@ void DesenharMenu(Font fonte, Jogadores *Jogador);
 void EncerrarJogo(Font fonte, Jogadores *Jogador);
 void checkRanking(Jogadores *Jogador, int score);
 void atualizarRanking();
+void getJogadores();
 
 // Função para verificar se um evento deve ser acionado baseado em um intervalo de tempo
 bool eventoAcionado(double intervalo)
@@ -53,6 +55,7 @@ int main()
         if (!jogoIniciado)
         {
             // Desenha o menu
+            getJogadores();
             DesenharMenu(fonte, &jogador);
         }
 
@@ -266,6 +269,32 @@ void DesenharMenu(Font fonte, Jogadores *Jogador)
                 }
             }
         }
+    }
+}
+
+void getJogadores()
+{
+    std::ifstream arquivo("/home/isabel/Documents/faculdade/Tetris/ranking.txt");
+
+    if (!arquivo)
+    {
+        std::cerr << "Erro ao abrir o arquivo!" << std::endl;
+        return;
+    }
+
+    int i = 0;
+    while (arquivo >> topJogadores[i].nome >> topJogadores[i].score && i < 10)
+    {
+        i++;
+    }
+
+    arquivo.close();
+
+    // Exibir os jogadores lidos (opcional)
+    for (int j = 0; j < i; j++)
+    {
+        std::cout << "Nome: " << topJogadores[j].nome
+                  << ", Pontuação: " << topJogadores[j].score << std::endl;
     }
 }
 
