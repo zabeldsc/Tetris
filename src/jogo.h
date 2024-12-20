@@ -7,7 +7,7 @@ class Jogo
 public:
     Jogo();
     ~Jogo();
-    void Draw();
+    void Desenhar();
     void TratarEntrada();
     void GuardarPeca();
     void QuedaLivre();
@@ -22,17 +22,15 @@ public:
     Music musica{};
 
 private:
-    void MoveBlockLeft();
-    void MoveBlockRight();
-    Bloco GetRandomBlock();
-    std::vector<Bloco> GetAllBlocks();
-    bool IsBlockOutside();
-    void RotateBlock();
-    void LockBlock();
-    bool BlockFits();
-    void UpdateScore(int linesCleared, int moveDownPoints);
+    Bloco GetBlocoAleatorio();
+    std::vector<Bloco> GetBlocos();
+    bool BlocoFora();
+    void RotacionarBloco();
+    void LockBloco();
+    bool BlocoCabe();
+    void MaisScoreLinha(int linhasDescidas);
     Grid grid{};
-    std::vector<Bloco> blocks;
+    std::vector<Bloco> blocos;
     Bloco blocoAtual{};
     Bloco proximoBloco{};
     Bloco blocoHold{};

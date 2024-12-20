@@ -11,6 +11,7 @@ Grid::Grid()
     cores = GetCoresCelulas();
 }
 
+/* Inicializando a matriz com 0, o que representa a cor do retângulos que compõem o Grid */
 void Grid::Inicializar()
 {
     for (int linha = 0; linha < numLinhas; linha++)
@@ -22,6 +23,7 @@ void Grid::Inicializar()
     }
 }
 
+/* Desenhando as células, o segredo do espaçamento está no -1 no WIDTH e no HEIGHT */
 void Grid::Desenhar()
 {
     for (int linha = 0; linha < numLinhas; linha++)
@@ -34,67 +36,44 @@ void Grid::Desenhar()
     }
 }
 
-bool Grid::ChecarCelulaFora(int linha, int coluna)
-{
-    if (linha >= 0 && linha < numLinhas && coluna >= 0 && coluna < numColunas)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool Grid::ChecarCelulaVazia(int linha, int coluna)
-{
-    if (grid[linha][coluna] == 0)
-    {
-        return true;
-    }
-    return false;
-}
-
 int Grid::LimparLinhasCheias()
 {
-    int completa = 0;
+    int linhasLimpas = 0;
+
     for (int linha = numLinhas - 1; linha >= 0; linha--)
     {
-        if (LinhaCheia(linha))
-        {
-            LimparLinha(linha);
-            completa++;
-        }
-        else if (completa > 0)
-        {
-            DescerLinha(linha, completa);
-        }
-    }
-    return completa;
-}
+        bool linhaCheia = true;
 
-bool Grid::LinhaCheia(int linha)
-{
-    for (int coluna = 0; coluna < numColunas; coluna++)
-    {
-        if (grid[linha][coluna] == 0)
+        for (int coluna = 0; coluna < numColunas; coluna++)
         {
-            return false;
+            if (grid[linha][coluna] == 0)
+            {
+                linhaCheia = false;
+                break;
+            }
+        }
+
+        if (linhaCheia)
+        {
+            linhasLimpas++;
+
+            for (int coluna = 0; coluna < numColunas; coluna++)
+            {
+                grid[linha][coluna] = 0;
+            }
+
+            for (int l = linha - 1; l >= 0; l--)
+            {
+                for (int coluna = 0; coluna < numColunas; coluna++)
+                {
+                    grid[l + 1][coluna] = grid[l][coluna];
+                    grid[l][coluna] = 0;
+                }
+            }
+
+            linha++;
         }
     }
-    return true;
-}
 
-void Grid::LimparLinha(int linha)
-{
-    for (int coluna = 0; coluna < numColunas; coluna++)
-    {
-        grid[linha][coluna] = 0;
-    }
-}
-
-void Grid::DescerLinha(int linha, int numLinhas)
-{
-    for (int coluna = 0; coluna < numColunas; coluna++)
-    {
-        grid[linha + numLinhas][coluna] = grid[linha][coluna];
-        grid[linha][coluna] = 0;
-    }
+    return linhasLimpas;
 }

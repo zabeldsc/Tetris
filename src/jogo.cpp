@@ -6,9 +6,9 @@ Jogo::Jogo()
 {
     srand(time(NULL));
     grid = Grid();
-    blocks = GetAllBlocks();
-    blocoAtual = GetRandomBlock();
-    proximoBloco = GetRandomBlock();
+    blocos = GetBlocos();
+    blocoAtual = GetBlocoAleatorio();
+    proximoBloco = GetBlocoAleatorio();
     gameOver = false;
     score = 0;
     InitAudioDevice();
@@ -26,24 +26,28 @@ Jogo::~Jogo()
     CloseAudioDevice();
 }
 
-Bloco Jogo::GetRandomBlock()
+Bloco Jogo::GetBlocoAleatorio()
 {
-    if (blocks.empty())
+    /* Se o vetor de blocos estiver vazio, ele enche novamente */
+    if (blocos.empty())
     {
-        blocks = GetAllBlocks();
+        blocos = GetBlocos();
     }
-    int randomIndex = rand() % blocks.size();
-    Bloco block = blocks[randomIndex];
-    blocks.erase(blocks.begin() + randomIndex);
+
+    /* Ele cria um index aleatório do tamanho de blocos, cria um bloco com esse index aleatório,
+    e apaga o bloco que existe naquele index para que não ocorra repetição, depois retorna o bloco */
+    int randomIndex = rand() % blocos.size();
+    Bloco block = blocos[randomIndex];
+    blocos.erase(blocos.begin() + randomIndex);
     return block;
 }
 
-std::vector<Bloco> Jogo::GetAllBlocks()
+std::vector<Bloco> Jogo::GetBlocos()
 {
     return {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
 }
 
-void Jogo::Draw()
+void Jogo::Desenhar()
 {
     grid.Desenhar();
     blocoAtual.Desenhar(11, 11);
@@ -63,39 +67,41 @@ void Jogo::Draw()
     switch (blocoHold.id)
     {
     case 3:
-        blocoHold.Desenhar(345, 500);
+        blocoHold.Desenhar(255, 500);
         break;
     case 4:
-        blocoHold.Desenhar(375, 490);
+        blocoHold.Desenhar(255, 490);
         break;
     default:
-        blocoHold.Desenhar(360, 485);
+        blocoHold.Desenhar(270, 485);
         break;
     }
 }
 
 void Jogo::TratarEntrada()
 {
-    int keyPressed = GetKeyPressed();
-    if (gameOver && keyPressed != 0)
-    {
-        gameOver = false;
-        Reset();
-    }
-    switch (keyPressed)
+    switch (GetKeyPressed())
     {
     case KEY_LEFT:
-        MoveBlockLeft();
+        blocoAtual.deslocamentoColuna--;
+        if (BlocoFora() == true || BlocoCabe() == false)
+        {
+            blocoAtual.deslocamentoColuna++;
+        }
         break;
     case KEY_RIGHT:
-        MoveBlockRight();
+        blocoAtual.deslocamentoColuna++;
+        if (BlocoFora() == true || BlocoCabe() == false)
+        {
+            blocoAtual.deslocamentoColuna--;
+        }
         break;
     case KEY_DOWN:
         DescerBloco();
-        UpdateScore(0, 1);
+        score++;
         break;
     case KEY_UP:
-        RotateBlock();
+        RotacionarBloco();
         break;
     case KEY_SPACE:
         QuedaLivre();
@@ -119,54 +125,29 @@ void Jogo::GuardarPeca()
         {
             blocoHold = blocoAtual;
             blocoAtual = proximoBloco;
-            proximoBloco = GetRandomBlock();
+            proximoBloco = GetBlocoAleatorio();
             primeiroHold = true;
         }
 
-        blocoHold.ReinicioPeca();
+        blocoHold.ReinicioPeca(blocoHold.id);
         fezHold = true;
     }
 }
 
 void Jogo::QuedaLivre()
 {
-    int celulasDescidas = 0;
 
     if (!gameOver)
     {
-        while (IsBlockOutside() == false && BlockFits() == true)
+        while (BlocoFora() == false && BlocoCabe() == true)
         {
-            blocoAtual.Mover(1, 0);
-            celulasDescidas++;
+            blocoAtual.deslocamentoLinha++;
+            score++;
         }
 
-        UpdateScore(0, celulasDescidas);
-        blocoAtual.Mover(-1, 0);
-        LockBlock();
-    }
-}
-
-void Jogo::MoveBlockLeft()
-{
-    if (!gameOver)
-    {
-        blocoAtual.Mover(0, -1);
-        if (IsBlockOutside() == true || BlockFits() == false)
-        {
-            blocoAtual.Mover(0, 1);
-        }
-    }
-}
-
-void Jogo::MoveBlockRight()
-{
-    if (!gameOver)
-    {
-        blocoAtual.Mover(0, 1);
-        if (IsBlockOutside() == true || BlockFits() == false)
-        {
-            blocoAtual.Mover(0, -1);
-        }
+        score--;
+        blocoAtual.deslocamentoLinha--;
+        LockBloco();
     }
 }
 
@@ -174,36 +155,33 @@ void Jogo::DescerBloco()
 {
     if (!gameOver)
     {
-        blocoAtual.Mover(1, 0);
-        if (IsBlockOutside() == true || BlockFits() == false)
+        blocoAtual.deslocamentoLinha++;
+        if (BlocoFora() == true || BlocoCabe() == false)
         {
-            blocoAtual.Mover(-1, 0);
-            LockBlock();
+            blocoAtual.deslocamentoLinha--;
+            LockBloco();
         }
     }
 }
 
-bool Jogo::IsBlockOutside()
-{
-    std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
-    for (Posicao item : tiles)
-    {
-        if (grid.ChecarCelulaFora(item.linha, item.coluna))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void Jogo::RotateBlock()
+void Jogo::RotacionarBloco()
 {
     if (!gameOver)
     {
-        blocoAtual.Rotacionar();
-        if (IsBlockOutside() == true || BlockFits() == false)
+        blocoAtual.estadoRotacao++;
+
+        if (blocoAtual.estadoRotacao == (int)blocoAtual.celulas.size())
         {
-            blocoAtual.DesfazerRotacao();
+            blocoAtual.estadoRotacao = 0;
+        }
+
+        if (BlocoFora() == true || BlocoCabe() == false)
+        {
+            blocoAtual.estadoRotacao--;
+            if (blocoAtual.estadoRotacao == -1)
+            {
+                blocoAtual.estadoRotacao = blocoAtual.celulas.size() - 1;
+            }
         }
         else
         {
@@ -212,7 +190,7 @@ void Jogo::RotateBlock()
     }
 }
 
-void Jogo::LockBlock()
+void Jogo::LockBloco()
 {
     std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
     for (Posicao item : tiles)
@@ -221,26 +199,26 @@ void Jogo::LockBlock()
     }
     blocoAtual = proximoBloco;
     fezHold = false;
-    if (BlockFits() == false)
+    if (BlocoCabe() == false)
     {
         gameOver = true;
     }
-    proximoBloco = GetRandomBlock();
-    int rowsCleared = grid.LimparLinhasCheias();
-    totalLinhas += rowsCleared;
-    if (rowsCleared > 0)
+    proximoBloco = GetBlocoAleatorio();
+    int linhasLimpas = grid.LimparLinhasCheias();
+    totalLinhas += linhasLimpas;
+    if (linhasLimpas > 0)
     {
         PlaySound(clearSound);
-        UpdateScore(rowsCleared, 0);
+        MaisScoreLinha(linhasLimpas);
     }
 }
 
-bool Jogo::BlockFits()
+bool Jogo::BlocoCabe()
 {
     std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
     for (Posicao item : tiles)
     {
-        if (grid.ChecarCelulaVazia(item.linha, item.coluna) == false)
+        if (grid.grid[item.linha][item.coluna] != 0)
         {
             return false;
         }
@@ -248,19 +226,32 @@ bool Jogo::BlockFits()
     return true;
 }
 
+bool Jogo::BlocoFora()
+{
+    std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
+    for (Posicao item : tiles)
+    {
+        if (item.linha < 0 || item.linha >= grid.numLinhas || item.coluna < 0 || item.coluna >= grid.numColunas)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Jogo::Reset()
 {
     grid.Inicializar();
-    blocks = GetAllBlocks();
-    blocoAtual = GetRandomBlock();
-    proximoBloco = GetRandomBlock();
+    blocos = GetBlocos();
+    blocoAtual = GetBlocoAleatorio();
+    proximoBloco = GetBlocoAleatorio();
     score = 0;
     gameOver = false;
 }
 
-void Jogo::UpdateScore(int linesCleared, int moveDownPoints)
+void Jogo::MaisScoreLinha(int linhasDescidas)
 {
-    switch (linesCleared)
+    switch (linhasDescidas)
     {
     case 1:
         score += 100 * nivel;
@@ -277,6 +268,4 @@ void Jogo::UpdateScore(int linesCleared, int moveDownPoints)
     default:
         break;
     }
-
-    score += moveDownPoints;
 }

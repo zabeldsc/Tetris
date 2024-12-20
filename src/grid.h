@@ -8,17 +8,12 @@ public:
     Grid();
     void Inicializar();
     void Desenhar();
-    bool ChecarCelulaFora(int linha, int coluna);
-    bool ChecarCelulaVazia(int linha, int coluna);
     int LimparLinhasCheias();
     int grid[20][10];
+        int numLinhas;
+    int numColunas;
 
 private:
-    bool LinhaCheia(int linha);
-    void LimparLinha(int linha);
-    void DescerLinha(int linha, int numLinhas);
-    int numLinhas;
-    int numColunas;
     int tamCelula;
     std::vector<Color> cores;
 };
