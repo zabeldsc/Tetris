@@ -6,11 +6,9 @@ Jogo::Jogo()
 {
     srand(time(NULL));
     grid = Grid();
-    blocos = GetBlocos();
+    blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};;
     blocoAtual = GetBlocoAleatorio();
     proximoBloco = GetBlocoAleatorio();
-    gameOver = false;
-    score = 0;
     InitAudioDevice();
     // musica = LoadMusicStream("sons/music.mp3");
     PlayMusicStream(musica);
@@ -31,20 +29,17 @@ Bloco Jogo::GetBlocoAleatorio()
     /* Se o vetor de blocos estiver vazio, ele enche novamente */
     if (blocos.empty())
     {
-        blocos = GetBlocos();
+        qtdBlocos = 7;
+        blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
     }
 
     /* Ele cria um index aleatório do tamanho de blocos, cria um bloco com esse index aleatório,
     e apaga o bloco que existe naquele index para que não ocorra repetição, depois retorna o bloco */
-    int randomIndex = rand() % blocos.size();
+    int randomIndex = rand() % qtdBlocos;
+    qtdBlocos--;
     Bloco block = blocos[randomIndex];
     blocos.erase(blocos.begin() + randomIndex);
     return block;
-}
-
-std::vector<Bloco> Jogo::GetBlocos()
-{
-    return {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
 }
 
 void Jogo::Desenhar()
@@ -242,7 +237,7 @@ bool Jogo::BlocoFora()
 void Jogo::Reset()
 {
     grid.Inicializar();
-    blocos = GetBlocos();
+    blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
     blocoAtual = GetBlocoAleatorio();
     proximoBloco = GetBlocoAleatorio();
     score = 0;

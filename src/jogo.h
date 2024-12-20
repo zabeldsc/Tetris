@@ -13,17 +13,17 @@ public:
     void QuedaLivre();
     void DescerBloco();
     void Reset();
-    bool gameOver{};
+    bool gameOver = false;
     bool primeiroHold{};
     bool fezHold{};
     int totalLinhas{};
-    int score{};
-    int nivel = 1; // Nível atual do jogo
+    int score = 0;
+    int nivel = 1;
+    int qtdBlocos = 7;
     Music musica{};
 
 private:
     Bloco GetBlocoAleatorio();
-    std::vector<Bloco> GetBlocos();
     bool BlocoFora();
     void RotacionarBloco();
     void LockBloco();
