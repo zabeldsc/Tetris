@@ -9,6 +9,7 @@
 		"**/*.exe": true,
 	},
 	"files.associations": {
+		"*.ndjson": "jsonl",
 		"*.dbclient-js": "javascript",
 		"iosfwd": "cpp",
 		"cctype": "cpp",
@@ -74,6 +75,8 @@
 		"thread": "cpp",
 		"cinttypes": "cpp",
 		"typeindex": "cpp",
-		"typeinfo": "cpp"
+		"typeinfo": "cpp",
+		"core": "cpp",
+		"*.inc": "cpp"
 	}
 }

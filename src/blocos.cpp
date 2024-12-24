@@ -11,6 +11,7 @@ public:
     LBlock()
     {
         id = 1;
+        /* Cada índice representa um estado de rotação */
         celulas[0] = {Posicao(0, 2), Posicao(1, 0), Posicao(1, 1), Posicao(1, 2)};
         celulas[1] = {Posicao(0, 1), Posicao(1, 1), Posicao(2, 1), Posicao(2, 2)};
         celulas[2] = {Posicao(1, 0), Posicao(1, 1), Posicao(1, 2), Posicao(2, 0)};

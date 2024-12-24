@@ -2,11 +2,7 @@
 
 Bloco::Bloco()
 {
-    tamanhoCelula = 30;
-    estadoRotacao = 0;
     cores = GetCoresCelulas();
-    deslocamentoLinha = 0;
-    deslocamentoColuna = 0;
 }
 
 void Bloco::Desenhar(int deslocamentoX, int deslocamentoY)

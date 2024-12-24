@@ -241,6 +241,8 @@ void Jogo::Reset()
     proximoBloco = GetBlocoAleatorio();
     score = 0;
     gameOver = false;
+    blocoHold = {};
+    primeiroHold = false;
 }
 
 void Jogo::MaisScoreLinha(int linhasDescidas)
