@@ -84,6 +84,7 @@ int main()
         DrawRectangleRounded({320, 190, 170, 180}, 0.1, 6, BLACK);
         DrawRectangleRounded({320, 425, 170, 180}, 0.1, 6, BLACK);
 
+        /* Função que vai desenhar a grade e os blocos! */
         jogo.Desenhar();
         EndDrawing();
     }

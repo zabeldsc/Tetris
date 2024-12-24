@@ -4,9 +4,6 @@
 
 Grid::Grid()
 {
-    numLinhas = 20;
-    numColunas = 10;
-    tamCelula = 30;
     Inicializar();
     cores = GetCoresCelulas();
 }

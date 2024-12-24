@@ -237,7 +237,6 @@ bool Jogo::BlocoFora()
 void Jogo::Reset()
 {
     grid.Inicializar();
-    blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
     blocoAtual = GetBlocoAleatorio();
     proximoBloco = GetBlocoAleatorio();
     score = 0;

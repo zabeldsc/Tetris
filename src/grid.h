@@ -10,10 +10,10 @@ public:
     void Desenhar();
     int LimparLinhasCheias();
     int grid[20][10];
-        int numLinhas;
-    int numColunas;
+    int numLinhas = 20;
+    int numColunas = 10;
 
 private:
-    int tamCelula;
+    int tamCelula = 30;
     std::vector<Color> cores;
 };
