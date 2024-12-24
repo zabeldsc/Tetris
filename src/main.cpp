@@ -209,7 +209,7 @@ void DesenharMenu(Font fonte, Jogadores *Jogador)
         {
             for (int i = 0; i < 255; i++) // Verifica as teclas pressionadas
             {
-                if (IsKeyPressed(i) && i >= 32 && i <= 126) // Apenas caracteres visíveis
+                if (IsKeyPressed(i) && i >= 32 && i <= 126 && i != KEY_SPACE) // Apenas caracteres visíveis
                 {
                     int len = strlen(nomeJogador);
                     if (len < 49) // Limita o tamanho máximo do nome
@@ -243,19 +243,15 @@ void getJogadores()
     }
 
     int i = 0;
+
+    /* >> é conhecido como operador de extração e é usado para ler dados de um fluxo de entrada */
+    /* ele lê até espaço ou quebra de linha */
     while (arquivo >> topJogadores[i].nome >> topJogadores[i].score && i < 10)
     {
         i++;
     }
-
+    
     arquivo.close();
-
-    // Exibir os jogadores lidos (opcional)
-    for (int j = 0; j < i; j++)
-    {
-        std::cout << "Nome: " << topJogadores[j].nome
-                  << ", Pontuação: " << topJogadores[j].score << std::endl;
-    }
 }
 
 void EncerrarJogo(Font fonte, Jogadores *Jogador)
