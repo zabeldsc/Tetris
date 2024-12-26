@@ -43,6 +43,7 @@ int Grid::LimparLinhasCheias()
 
         for (int coluna = 0; coluna < numColunas; coluna++)
         {
+            /* Verifica se existe algum espaço vazio na linha*/
             if (grid[linha][coluna] == 0)
             {
                 linhaCheia = false;
@@ -54,11 +55,13 @@ int Grid::LimparLinhasCheias()
         {
             linhasLimpas++;
 
+            /* Se a linha estiver cheia, limpa-a */
             for (int coluna = 0; coluna < numColunas; coluna++)
             {
                 grid[linha][coluna] = 0;
             }
 
+            /* Todas as linhas acima deslocarão para baixo */
             for (int l = linha - 1; l >= 0; l--)
             {
                 for (int coluna = 0; coluna < numColunas; coluna++)

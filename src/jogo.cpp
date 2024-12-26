@@ -6,22 +6,9 @@ Jogo::Jogo()
 {
     srand(time(NULL));
     grid = Grid();
-    blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};;
+    blocos = {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
     blocoAtual = GetBlocoAleatorio();
     proximoBloco = GetBlocoAleatorio();
-    InitAudioDevice();
-    // musica = LoadMusicStream("sons/music.mp3");
-    PlayMusicStream(musica);
-    rotateSound = LoadSound("sons/rotate.mp3");
-    clearSound = LoadSound("sons/clear.mp3");
-}
-
-Jogo::~Jogo()
-{
-    UnloadSound(rotateSound);
-    UnloadSound(clearSound);
-    UnloadMusicStream(musica);
-    CloseAudioDevice();
 }
 
 Bloco Jogo::GetBlocoAleatorio()
@@ -30,7 +17,7 @@ Bloco Jogo::GetBlocoAleatorio()
     if (blocos.empty())
     {
         qtdBlocos = 7;
-        blocos =  {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
+        blocos = {IBlock(), JBlock(), LBlock(), OBlock(), SBlock(), TBlock(), ZBlock()};
     }
 
     /* Ele cria um index aleatório do tamanho de blocos, cria um bloco com esse index aleatório,
@@ -132,55 +119,45 @@ void Jogo::GuardarPeca()
 void Jogo::QuedaLivre()
 {
 
-    if (!gameOver)
+    while (BlocoFora() == false && BlocoCabe() == true)
     {
-        while (BlocoFora() == false && BlocoCabe() == true)
-        {
-            blocoAtual.deslocamentoLinha++;
-            score++;
-        }
+        blocoAtual.deslocamentoLinha++;
+        score++;
+    }
 
-        score--;
+    score--;
+    blocoAtual.deslocamentoLinha--;
+    LockBloco();
+}
+
+void Jogo::DescerBloco()
+{
+
+    blocoAtual.deslocamentoLinha++;
+    if (BlocoFora() == true || BlocoCabe() == false)
+    {
         blocoAtual.deslocamentoLinha--;
         LockBloco();
     }
 }
 
-void Jogo::DescerBloco()
-{
-    if (!gameOver)
-    {
-        blocoAtual.deslocamentoLinha++;
-        if (BlocoFora() == true || BlocoCabe() == false)
-        {
-            blocoAtual.deslocamentoLinha--;
-            LockBloco();
-        }
-    }
-}
-
 void Jogo::RotacionarBloco()
 {
-    if (!gameOver)
+
+    blocoAtual.estadoRotacao++;
+
+    if (blocoAtual.estadoRotacao == (int)blocoAtual.celulas.size())
     {
-        blocoAtual.estadoRotacao++;
+        blocoAtual.estadoRotacao = 0;
+    }
 
-        if (blocoAtual.estadoRotacao == (int)blocoAtual.celulas.size())
+    /* Verifica colisões na nova posição */
+    if (BlocoFora() == true || BlocoCabe() == false)
+    {
+        blocoAtual.estadoRotacao--;
+        if (blocoAtual.estadoRotacao == -1)
         {
-            blocoAtual.estadoRotacao = 0;
-        }
-
-        if (BlocoFora() == true || BlocoCabe() == false)
-        {
-            blocoAtual.estadoRotacao--;
-            if (blocoAtual.estadoRotacao == -1)
-            {
-                blocoAtual.estadoRotacao = blocoAtual.celulas.size() - 1;
-            }
-        }
-        else
-        {
-            PlaySound(rotateSound);
+            blocoAtual.estadoRotacao = blocoAtual.celulas.size() - 1;
         }
     }
 }
@@ -188,9 +165,10 @@ void Jogo::RotacionarBloco()
 void Jogo::LockBloco()
 {
     std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
-    for (Posicao item : tiles)
+    for (int i = 0; i < (int)tiles.size(); i++)
     {
-        grid.grid[item.linha][item.coluna] = blocoAtual.id;
+        auto celula = tiles[i];
+        grid.grid[celula.linha][celula.coluna] = blocoAtual.id;
     }
     blocoAtual = proximoBloco;
     fezHold = false;
@@ -203,7 +181,6 @@ void Jogo::LockBloco()
     totalLinhas += linhasLimpas;
     if (linhasLimpas > 0)
     {
-        PlaySound(clearSound);
         MaisScoreLinha(linhasLimpas);
     }
 }
@@ -211,9 +188,11 @@ void Jogo::LockBloco()
 bool Jogo::BlocoCabe()
 {
     std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
-    for (Posicao item : tiles)
+    for (int i = 0; i < (int)tiles.size(); i++)
     {
-        if (grid.grid[item.linha][item.coluna] != 0)
+        auto celula = tiles[i];
+        /* Retorna falso se uma das células conter cor, ou seja, outro bloco */
+        if (grid.grid[celula.linha][celula.coluna] != 0)
         {
             return false;
         }
@@ -224,9 +203,11 @@ bool Jogo::BlocoCabe()
 bool Jogo::BlocoFora()
 {
     std::vector<Posicao> tiles = blocoAtual.GetCellPositions();
-    for (Posicao item : tiles)
+    for (int i = 0; i < (int)tiles.size(); i++)
     {
-        if (item.linha < 0 || item.linha >= grid.numLinhas || item.coluna < 0 || item.coluna >= grid.numColunas)
+        auto celula = tiles[i];
+        /* Retorna true se uma das células estiver fora do Grid */
+        if (celula.linha < 0 || celula.linha >= grid.numLinhas || celula.coluna < 0 || celula.coluna >= grid.numColunas)
         {
             return true;
         }

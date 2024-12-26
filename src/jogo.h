@@ -6,7 +6,6 @@ class Jogo
 {
 public:
     Jogo();
-    ~Jogo();
     void Desenhar();
     void TratarEntrada();
     void GuardarPeca();
@@ -20,7 +19,6 @@ public:
     int score = 0;
     int nivel = 1;
     int qtdBlocos = 7;
-    Music musica{};
 
 private:
     Bloco GetBlocoAleatorio();
@@ -34,6 +32,4 @@ private:
     Bloco blocoAtual{};
     Bloco proximoBloco{};
     Bloco blocoHold{};
-    Sound rotateSound{};
-    Sound clearSound{};
 };

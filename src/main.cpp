@@ -40,9 +40,6 @@ int main()
             DesenharMenu(fonte, &jogador);
         }
 
-        // Atualiza o fluxo de música para evitar travamentos ou loops incompletos
-        UpdateMusicStream(jogo.musica);
-
         // Lida com a entrada do jogador, como teclas pressionadas
         jogo.TratarEntrada();
 

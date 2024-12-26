@@ -9,9 +9,11 @@ void Bloco::Desenhar(int deslocamentoX, int deslocamentoY)
 {
     /* Aqui ele desenha cada célula individualmente! */
     std::vector<Posicao> tiles = GetCellPositions();
-    for (Posicao item : tiles)
+    for (int i = 0; i < (int)tiles.size(); i++)
     {
-        DrawRectangle(item.coluna * tamanhoCelula + deslocamentoX, item.linha * tamanhoCelula + deslocamentoY, tamanhoCelula - 1, tamanhoCelula - 1, cores[id]);
+        int posX = tiles[i].coluna * tamanhoCelula + deslocamentoX;
+        int posY = tiles[i].linha * tamanhoCelula + deslocamentoY;
+        DrawRectangle(posX, posY, tamanhoCelula - 1, tamanhoCelula - 1, cores[id]);
     }
 }
 
@@ -23,15 +25,15 @@ std::vector<Posicao> Bloco::GetCellPositions()
     std::vector<Posicao> vetorPosicaoPeca = celulas[estadoRotacao];
     std::vector<Posicao> movedTiles;
 
-    /* Cada item, ou seja, cada posição que uma das células do Bloco vai ocupar,
-    é inserido dentro de movedTiles a novaPosicao da CELULA! */
-    for (Posicao item : vetorPosicaoPeca)
+    for (int i = 0; i < (int)vetorPosicaoPeca.size(); i++)
     {
-        /* A novaPosicao precisa ter não só a linha e coluna para formar a imagem, mas também conter o
-        deslocamento da LINHA e da COLUNA (pois o usuário move a peça!) */
-        Posicao novaPosicao = Posicao(item.linha + deslocamentoLinha, item.coluna + deslocamentoColuna);
+        int novaLinha = vetorPosicaoPeca[i].linha + deslocamentoLinha;
+        int novaColuna = vetorPosicaoPeca[i].coluna + deslocamentoColuna;
+        /* Pegando a posição da célula junto com o deslocamento */
+        Posicao novaPosicao = Posicao(novaLinha, novaColuna);
         movedTiles.push_back(novaPosicao);
     }
+
     return movedTiles;
 }
 
